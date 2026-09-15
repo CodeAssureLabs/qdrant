@@ -5,6 +5,7 @@ use std::collections::HashMap;
 
 use collection::collection_state;
 use collection::shards::CollectionId;
+use semver::Version;
 
 use super::Action;
 use crate::content_manager::alias_mapping::AliasMapping;
@@ -32,6 +33,20 @@ impl ClusterState {
 
     pub fn has_collection(&self, collection: &str) -> bool {
         self.collections.contains_key(collection)
+    }
+
+    /// Whether every known peer runs at least `version`
+    ///
+    /// More peer addresses than metadata means at least one version is unknown. The count check and
+    /// the metadata scan intentionally match `ChannelService::all_peers_at_version`.
+    pub fn all_peers_at_version(&self, version: &Version) -> bool {
+        if self.peer_address_by_id.len() > self.peer_metadata_by_id.len() {
+            return false;
+        }
+
+        self.peer_metadata_by_id
+            .values()
+            .all(|metadata| metadata.version() >= version)
     }
 
     /// Resolve a name that may be an alias, and check that the collection exists

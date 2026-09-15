@@ -1944,6 +1944,11 @@ pub struct PeerMetadata {
 }
 
 impl PeerMetadata {
+    /// Version reported by the peer
+    pub fn version(&self) -> &Version {
+        &self.version
+    }
+
     /// Metadata of a peer running `version`, to set up a state for a test
     #[cfg(any(test, feature = "testing"))]
     pub fn new(version: Version) -> Self {
