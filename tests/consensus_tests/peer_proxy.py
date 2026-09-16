@@ -2,12 +2,14 @@
 
 The proxy forwards protobuf bytes unchanged. A gate holds one matching request
 before forwarding it. Later requests, including calls to the same method, pass
-through so recovery traffic can continue. Matchers run on the server loop and
-must not block. They can decode the bytes to select a collection or shard.
+through so recovery traffic can continue. Response gates hold one reply after
+the upstream handler returns. Matchers run on the server loop and must not
+block. They can decode the bytes to select a collection, shard, or Raft entry.
 
-RPC bodies do not identify the source peer. Tests must establish which peer
-sends the selected request. HTTP gates select the full source URL and intercept
-downloads made by the peer configured with this proxy's environment.
+Recovery RPC bodies generally do not identify the source peer. Tests must
+establish which peer sends the selected request. Raft messages carry peer IDs.
+HTTP gates select the full source URL and intercept downloads made by the peer
+configured with this proxy's environment.
 
 Only unary gRPC and bodyless HTTP GETs to local peers are supported, not
 streaming RPCs, HTTPS, or a general-purpose HTTP proxy.
@@ -43,9 +45,11 @@ class RequestGate:
         self._released = Future()
 
     def wait_for_request(self, timeout: float = 30):
-        """Return the RPC bytes or download URL once held before forwarding.
+        """Return the RPC bytes or download URL once the gate is reached.
 
-        This does not prove that the transfer has copied any data.
+        Request gates stop before forwarding. Response gates stop after the
+        upstream handler returns. Neither proves background work has finished.
+        Response gates raise if the upstream call fails or is cancelled.
         """
         try:
             return self._arrived.result(timeout)
@@ -143,6 +147,16 @@ class PeerProxy(grpc.GenericRpcHandler):
             raise ValueError("Use the full gRPC method path: /service/method")
         return self._hold(("rpc", method), matches)
 
+    def hold_rpc_response(self, method: str, matches: Callable[[bytes], bool] = lambda _: True):
+        """Hold one successful response after forwarding the matching request.
+
+        Matchers receive request bytes. Reaching the gate means the upstream
+        handler returned, not that its background work has finished.
+        """
+        if not method.startswith("/") or method.count("/") != 2:
+            raise ValueError("Use the full gRPC method path: /service/method")
+        return self._hold(("rpc_response", method), matches)
+
     def hold_snapshot_download(self, source_uri: str, collection: str, shard_id: int):
         """Hold this peer's download from the given source, collection, and shard.
 
@@ -169,13 +183,14 @@ class PeerProxy(grpc.GenericRpcHandler):
         finally:
             gate.release()
 
-    def _take_gate(self, key, request):
+    def _take_gate(self, key, request, notify=True):
         with self._lock:
             gate = self._gates.get(key)
             if gate is not None and gate._matches(request):
                 # Another peer's recovery must not wait behind this request.
                 del self._gates[key]
-                gate._arrived.set_result(request)
+                if notify:
+                    gate._arrived.set_result(request)
                 return gate
         return None
 
@@ -253,6 +268,9 @@ class PeerProxy(grpc.GenericRpcHandler):
                     gate.cancelled.set()
                     raise
 
+            response_gate = self._take_gate(
+                ("rpc_response", handler_call_details.method), request, notify=False,
+            )
             call = self._channel.unary_unary(handler_call_details.method)(
                 request,
                 metadata=context.invocation_metadata(),
@@ -261,11 +279,26 @@ class PeerProxy(grpc.GenericRpcHandler):
             try:
                 await context.send_initial_metadata(await call.initial_metadata())
                 response = await call
+                if response_gate is not None:
+                    response_gate._arrived.set_result(request)
+                    await asyncio.shield(asyncio.wrap_future(response_gate._released))
                 context.set_trailing_metadata(await call.trailing_metadata())
                 return response
+            except asyncio.CancelledError:
+                if response_gate is not None:
+                    response_gate.cancelled.set()
+                raise
             except grpc.aio.AioRpcError as error:
+                if response_gate is not None:
+                    if error.code() in (grpc.StatusCode.CANCELLED, grpc.StatusCode.DEADLINE_EXCEEDED):
+                        response_gate.cancelled.set()
+                    if not response_gate._arrived.done():
+                        response_gate._arrived.set_exception(error)
                 await context.abort(error.code(), error.details(), tuple(error.trailing_metadata()))
             finally:
+                if response_gate is not None:
+                    # Claimed gates are no longer in the proxy's cleanup list.
+                    response_gate._arrived.cancel()
                 # A disconnected caller must not leave work running upstream.
                 call.cancel()
 
