@@ -151,8 +151,26 @@ impl ConsensusStateMachine {
                 ApplyOutcome::new(self.state.plan_create_shard_key(&self.context, operation))
             }
 
-            CollectionMetaOperations::DropShardKey(_)
-            | CollectionMetaOperations::SetShardReplicaState(_)
+            CollectionMetaOperations::DropShardKey(operation) => {
+                let aborts_resharding = self
+                    .state
+                    .resolve_collection(&operation.collection_name)
+                    .ok()
+                    .and_then(|collection| self.state.collection(&collection))
+                    .and_then(|collection| collection.resharding.as_ref())
+                    .is_some_and(|resharding| {
+                        resharding.shard_key.as_ref() == Some(&operation.shard_key)
+                    });
+
+                // Dropping this key first aborts its resharding. That cascade lands in PR6.
+                if aborts_resharding {
+                    ApplyOutcome::NotCovered
+                } else {
+                    ApplyOutcome::new(self.state.plan_drop_shard_key(operation))
+                }
+            }
+
+            CollectionMetaOperations::SetShardReplicaState(_)
             | CollectionMetaOperations::TransferShard(_, _)
             | CollectionMetaOperations::Resharding(_, _) => ApplyOutcome::NotCovered,
 

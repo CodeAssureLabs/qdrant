@@ -121,6 +121,40 @@ impl ClusterState {
                 }
             }
 
+            // Stops node-local tasks and does not change consensus state
+            Action::InvalidateCleanLocalShards { .. } => {}
+
+            Action::RemoveShardKey {
+                collection,
+                shard_key,
+            } => {
+                let Some(state) = self.collection_mut(collection) else {
+                    return;
+                };
+
+                let Some(shard_ids) = state.shards_key_mapping.remove(shard_key) else {
+                    return;
+                };
+
+                // Custom-sharding startup only loads shards present in the mapping. Model the
+                // state after a restart at this gate, where any not-yet-deleted directories are
+                // invisible and replay has no remaining work.
+                for shard_id in shard_ids {
+                    state.shards.remove(&shard_id);
+                }
+            }
+
+            Action::DropShard {
+                collection,
+                shard_id,
+            } => {
+                let Some(state) = self.collection_mut(collection) else {
+                    return;
+                };
+
+                state.shards.remove(shard_id);
+            }
+
             Action::UpdateAliases { set, remove } => {
                 for alias in remove {
                     self.aliases.remove(alias);
