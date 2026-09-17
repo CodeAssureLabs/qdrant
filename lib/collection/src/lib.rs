@@ -13,6 +13,7 @@ pub mod problems;
 pub mod recommendations;
 pub mod shards;
 pub mod telemetry;
+pub mod toc_shortcut;
 mod update_handler;
 pub mod wal_delta;
 
@@ -24,5 +25,3 @@ mod tests;
 
 pub mod profiling;
 pub mod update_workers;
-
-pub mod toc_shortcut;
