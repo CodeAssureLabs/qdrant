@@ -54,3 +54,5 @@ pub mod serialize_peer_addresses {
             .map_err(|err| de::Error::custom(format!("Failed to parse uri: {err}")))
     }
 }
+
+pub mod bin_hook;
