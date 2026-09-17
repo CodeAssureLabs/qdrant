@@ -18,5 +18,6 @@ pub mod strings;
 pub mod telemetry;
 pub mod telemetry_ops;
 pub mod telemetry_reporting;
+pub mod toc_summary;
 pub mod update;
 pub mod validate_vectors;

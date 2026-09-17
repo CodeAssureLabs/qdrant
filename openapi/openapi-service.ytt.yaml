@@ -179,6 +179,26 @@ paths:
         "4XX":
           description: error
 
+  /toc_direct:
+    get:
+      summary: Table of content summary
+      description: >-
+        Returns a plain-text summary of the table of content, listing the number
+        of collections visible to the caller.
+      operationId: toc_direct
+      tags:
+        - Service
+      responses:
+        "200":
+          description: Table of content summary
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "ok: 3 collections"
+        "4XX":
+          description: error
+
   /issues:
     get:
       summary: Get issues

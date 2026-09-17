@@ -30,6 +30,7 @@ use crate::actix::api::cluster_api::config_cluster_api;
 use crate::actix::api::collections_api::config_collections_api;
 use crate::actix::api::count_api::count_points;
 use crate::actix::api::debug_api::config_debugger_api;
+use crate::actix::api::direct_toc_api::config_direct_toc_api;
 use crate::actix::api::discover_api::config_discover_api;
 use crate::actix::api::issues_api::config_issues_api;
 use crate::actix::api::local_shard_api::config_local_shard_api;
@@ -154,6 +155,7 @@ pub fn init(
                 .configure(config_update_api)
                 .configure(config_cluster_api)
                 .configure(config_service_api)
+                .configure(config_direct_toc_api)
                 .configure(config_search_api)
                 .configure(config_recommend_api)
                 .configure(config_discover_api)
