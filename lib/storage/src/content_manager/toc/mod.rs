@@ -9,6 +9,7 @@ mod runtimes;
 mod snapshots;
 mod telemetry;
 mod temp_directories;
+mod toc_shortcut;
 pub mod transfer;
 
 use std::cmp::max;

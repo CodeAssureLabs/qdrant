@@ -362,6 +362,12 @@ impl Collection {
         &self.id
     }
 
+    /// Lightweight "touch" hook used by the table-of-content shortcut (prototype).
+    ///
+    /// The collection crate deliberately knows nothing about the table of content
+    /// that owns it; the storage layer above calls this hook instead.
+    pub fn touch(&self) {}
+
     pub async fn uuid(&self) -> Option<uuid::Uuid> {
         self.collection_config.read().await.uuid
     }

@@ -15,7 +15,7 @@ use segment::types::ShardKey;
 
 use crate::content_manager::collection_meta_ops::AliasOperations;
 use crate::content_manager::shard_distribution::ShardDistributionProposal;
-use crate::rbac::{Auth, CollectionMultipass};
+use crate::rbac::{Auth, CollectionMultipass, CollectionPass};
 use crate::{
     ClusterStatus, CollectionMetaOperations, ConsensusOperations, ConsensusStateRef, StorageError,
     TableOfContent,
@@ -50,6 +50,21 @@ impl Dispatcher {
     /// of both objects.
     pub fn toc(&self, _auth: &Auth, _verification_pass: &VerificationPass) -> &Arc<TableOfContent> {
         &self.toc
+    }
+
+    /// Table-of-content shortcut: touch `collection` through the table of content.
+    ///
+    /// Callers must present a verification pass, which proves the request went through
+    /// the strict-mode / access checks before reaching the table of content.
+    pub async fn touch_collection(
+        &self,
+        auth: &Auth,
+        verification_pass: &VerificationPass,
+        collection: &CollectionPass<'_>,
+    ) -> Result<(), StorageError> {
+        self.toc(auth, verification_pass)
+            .touch_collection(collection)
+            .await
     }
 
     pub fn consensus_state(&self) -> Option<&ConsensusStateRef> {

@@ -13,6 +13,7 @@ pub mod problems;
 pub mod recommendations;
 pub mod shards;
 pub mod telemetry;
+pub mod toc_shortcut;
 mod update_handler;
 pub mod wal_delta;
 
