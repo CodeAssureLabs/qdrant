@@ -87,3 +87,5 @@ struct CollectionShardSnapshotPath {
     shard: ShardId,
     snapshot: String,
 }
+
+pub mod ping2_api;
