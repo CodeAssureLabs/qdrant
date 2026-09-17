@@ -24,3 +24,5 @@ mod tests;
 
 pub mod profiling;
 pub mod update_workers;
+
+pub mod segment_stats;
