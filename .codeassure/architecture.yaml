@@ -43,3 +43,8 @@ invariants:
     forbid_pattern: '\bprintln!\s*\('
     reason: "the storage crate logs through log/tracing, not stdout"
     check: detect_only
+role_overrides:
+  - glob: "lib/storage/**"
+    role: persistence_adapter
+    action: exclude
+    reason: "lib/storage is the table-of-content / dispatcher layer every handler calls; persistence lives in lib/segment"
