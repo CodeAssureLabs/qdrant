@@ -36,6 +36,7 @@ shard = { path = "../shard", default-features = false, features = ["testing"] }
 pprof = { workspace = true }
 
 [dependencies]
+storage = { path = "../storage" }
 bytemuck = { workspace = true }
 fs-err = { workspace = true }
 parking_lot = { workspace = true }
