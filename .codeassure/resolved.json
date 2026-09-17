@@ -1,0 +1,121 @@
+{
+  "artifact_version": 1,
+  "source_manifest_version": 1,
+  "layer_map": {},
+  "path_globs": [
+    {
+      "glob": "src/**",
+      "layer": "entry"
+    },
+    {
+      "glob": "lib/storage/**",
+      "layer": "service"
+    },
+    {
+      "glob": "lib/collection/**",
+      "layer": "domain"
+    },
+    {
+      "glob": "lib/shard/**",
+      "layer": "domain"
+    },
+    {
+      "glob": "lib/segment/**",
+      "layer": "data"
+    },
+    {
+      "glob": "lib/posting_list/**",
+      "layer": "data"
+    },
+    {
+      "glob": "lib/sparse/**",
+      "layer": "data"
+    },
+    {
+      "glob": "lib/wal/**",
+      "layer": "data"
+    },
+    {
+      "glob": "lib/blobstore/**",
+      "layer": "data"
+    },
+    {
+      "glob": "lib/bm25/**",
+      "layer": "data"
+    },
+    {
+      "glob": "lib/gpu/**",
+      "layer": "data"
+    },
+    {
+      "glob": "lib/trififo/**",
+      "layer": "data"
+    },
+    {
+      "glob": "lib/quantization/**",
+      "layer": "data"
+    },
+    {
+      "glob": "lib/common/**",
+      "layer": "utils"
+    },
+    {
+      "glob": "lib/api/**",
+      "layer": "utils"
+    },
+    {
+      "glob": "tools/**",
+      "layer": "utils"
+    },
+    {
+      "glob": "tests/**",
+      "layer": "utils"
+    },
+    {
+      "glob": "docs/**",
+      "layer": "utils"
+    },
+    {
+      "glob": "openapi/**",
+      "layer": "utils"
+    },
+    {
+      "glob": "lib/macros/**",
+      "layer": "utils"
+    },
+    {
+      "glob": "lib/uio-grpc-client/**",
+      "layer": "utils"
+    },
+    {
+      "glob": "lib/edge/**",
+      "layer": "utils"
+    }
+  ],
+  "compiled_rules": {
+    "allowed": {
+      "entry": [
+        "service",
+        "domain",
+        "data",
+        "utils",
+        "config"
+      ],
+      "service": [
+        "domain",
+        "data",
+        "utils",
+        "config"
+      ],
+      "domain": [
+        "data",
+        "utils",
+        "config"
+      ],
+      "data": [
+        "utils",
+        "config"
+      ]
+    }
+  }
+}

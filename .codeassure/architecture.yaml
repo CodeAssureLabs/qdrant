@@ -1,0 +1,45 @@
+schema_version: 1
+manifest_version: 1
+repo: CodeAssureLabs/qdrant
+layers:
+  entry: [service, domain, data]
+  service: [domain, data]
+  domain: [data]
+  data: []
+cross_cutting: [utils, config]
+forbidden_edges:
+  - id: segment-no-collection
+    from: data
+    to: domain
+    reason: "lib/segment is the storage primitive; it must not depend on lib/collection or lib/shard"
+    check: blocking
+    severity: high
+  - id: collection-no-storage
+    from: domain
+    to: service
+    reason: "lib/collection must not depend on lib/storage (the table-of-content / dispatcher layer above it)"
+    check: blocking
+    severity: high
+  - id: lib-no-binary
+    from: service
+    to: entry
+    reason: "library crates must not depend on the qdrant binary crate (src/)"
+    check: blocking
+    severity: high
+required_companions:
+  - id: rest-handler-needs-openapi
+    when: "src/actix/api/*.rs"
+    require: ["docs/redoc/**/openapi.json", "openapi/**"]
+    reason: "a new or changed REST handler must update the OpenAPI spec"
+    check: detect_only
+invariants:
+  - id: no-thread-spawn-in-segment
+    within: "lib/segment/src/**"
+    forbid_pattern: '\bstd::thread::spawn\b'
+    reason: "segment work runs on the rayon/tokio pools, never on raw std::thread"
+    check: detect_only
+  - id: no-println-in-storage
+    within: "lib/storage/src/**"
+    forbid_pattern: '\bprintln!\s*\('
+    reason: "the storage crate logs through log/tracing, not stdout"
+    check: detect_only
