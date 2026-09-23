@@ -1,5 +1,5 @@
 //! Background flush (prototype).
 
 pub fn spawn_flush() {
-    std::thread::spawn(|| {});
+    // TODO: implement background flush using rayon or tokio pools
 }
