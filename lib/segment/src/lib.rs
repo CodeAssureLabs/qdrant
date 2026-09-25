@@ -10,6 +10,7 @@ pub mod segment_constructor;
 pub mod spaces;
 pub mod telemetry;
 
+pub mod background_flush;
 mod compat;
 pub mod data_types;
 pub mod json_path;
