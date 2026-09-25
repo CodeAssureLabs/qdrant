@@ -1,3 +1,4 @@
+pub mod background_flush;
 pub mod common;
 pub mod entry;
 #[cfg(feature = "testing")]
@@ -16,5 +17,3 @@ pub mod json_path;
 pub mod types;
 pub mod utils;
 pub mod vector_storage;
-
-pub mod background_flush;
