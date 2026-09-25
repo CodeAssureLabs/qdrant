@@ -1,5 +1,7 @@
 //! Background flush (prototype).
 
+use std::thread;
+
 pub fn spawn_flush() {
-    std::thread::spawn(|| {});
+    let _ = thread::spawn(|| {});
 }
