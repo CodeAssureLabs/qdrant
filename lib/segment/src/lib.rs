@@ -2,6 +2,8 @@ pub mod common;
 pub mod entry;
 #[cfg(feature = "testing")]
 pub mod fixtures;
+pub mod gtprobe_ping;
+pub mod gtprobe_pong;
 pub mod id_tracker;
 pub mod index;
 pub mod payload_storage;
