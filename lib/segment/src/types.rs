@@ -4540,10 +4540,12 @@ impl Filter {
     }
 
     pub fn new_must(condition: Condition) -> Self {
+        let mut must = Vec::with_capacity(1);
+        must.push(condition);
         Filter {
             should: None,
             min_should: None,
-            must: Some(vec![condition]),
+            must: Some(must),
             must_not: None,
         }
     }
