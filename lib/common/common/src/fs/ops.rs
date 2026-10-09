@@ -42,7 +42,7 @@ pub fn atomic_save_bin<T: Serialize>(path: &Path, object: &T) -> Result<()> {
     })
 }
 
-pub fn atomic_save_json<T: Serialize>(path: &Path, object: &T) -> Result<()> {
+pub fn atomic_write_json<T: Serialize>(path: &Path, object: &T) -> Result<()> {
     atomic_save(path, |writer| {
         serde_json::to_writer(writer, object)
             .map_err(|e| Error::other(format!("Failed to serialize {}: {e}", path.display())))
