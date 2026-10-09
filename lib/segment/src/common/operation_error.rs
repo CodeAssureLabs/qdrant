@@ -422,8 +422,8 @@ impl From<CancelledError> for OperationError {
     }
 }
 
-pub fn check_process_stopped(stopped: &AtomicBool) -> CancellableResult<()> {
-    if stopped.load(Ordering::Relaxed) {
+pub fn check_process_stopped(stopped: &AtomicBool, ordering: Ordering) -> CancellableResult<()> {
+    if stopped.load(ordering) {
         return Err(CancelledError);
     }
     Ok(())
