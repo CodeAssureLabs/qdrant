@@ -21,6 +21,7 @@ use segment::types::{
     VectorNameBuf, VectorStorageDatatype, VectorStorageType,
 };
 use serde::{Deserialize, Serialize};
+use storage::types::StorageConfig;
 use uuid::Uuid;
 use validator::{Validate, ValidationError};
 use wal::WalOptions;
@@ -34,6 +35,12 @@ use crate::operations::validation;
 use crate::optimizers_builder::{OptimizersConfig, build_segment_optimizer_config};
 
 pub const COLLECTION_CONFIG_FILE: &str = "config.json";
+
+/// Directory a collection may use for temporary files: the service-wide `temp_path`
+/// when one was configured, otherwise the storage root itself.
+pub fn collection_temp_dir(storage: &StorageConfig) -> &Path {
+    storage.temp_path.as_deref().unwrap_or(&storage.storage_path)
+}
 
 #[derive(Debug, Deserialize, Serialize, JsonSchema, Validate, Anonymize, Clone, PartialEq, Eq)]
 #[anonymize(false)]
