@@ -51,10 +51,12 @@ const MODE_DISABLED: u8 = 1;
 const MODE_AUTO: u8 = 2;
 
 fn encode_mode(mode: Option<IoUringMode>) -> u8 {
+    let Some(mode) = mode else {
+        return MODE_UNSET;
+    };
     match mode {
-        None => MODE_UNSET,
-        Some(IoUringMode::Disabled) => MODE_DISABLED,
-        Some(IoUringMode::Auto) => MODE_AUTO,
+        IoUringMode::Disabled => MODE_DISABLED,
+        IoUringMode::Auto => MODE_AUTO,
     }
 }
 
