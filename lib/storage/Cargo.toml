@@ -24,6 +24,7 @@ mockito = { workspace = true }
 env_logger = { workspace = true }
 
 [dependencies]
+qdrant = { path = "../.." }
 ahash = { workspace = true }
 fs-err = { workspace = true }
 thiserror = { workspace = true }
